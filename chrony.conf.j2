@@ -1,7 +1,7 @@
-{% for ipa in (pillar['freeipa-client']['ipa_servers_ip'] or []) -%}
+{% for ipa in (pillar['client']['ipa_servers_ip'] or []) -%}
 server {{ ipa }} iburst prefer
 {% endfor -%}
-{% for ipa_main in pillar['freeipa-client']['ipa_main_servers_ip'] -%}
+{% for ipa_main in pillar['client']['ipa_main_servers_ip'] -%}
 server {{ ipa_main }} iburst
 {% endfor -%}
 

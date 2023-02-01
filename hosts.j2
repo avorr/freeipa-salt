@@ -1,3 +1,3 @@
 127.0.0.1   localhost
 ::1         localhost
-{{ grains['ip4_interfaces']['eth0'][0] }}  {{ grains['host'] }}.{{ pillar['freeipa-client']['ipa_dns_zone'] }}
+{{ grains['ip4_interfaces']['eth0'][0] }} {{ grains['id'] }}
