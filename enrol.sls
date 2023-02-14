@@ -105,6 +105,10 @@ Update CA Trust on RedHat:
   cmd.run:
     - name: update-ca-trust
 
+kinit:
+  cmd.run:
+    - name: echo '{{ pillar['client']['ipa_server_password'] }}' | kinit {{ pillar['client']['ipa_server_principal'] }}
+
 Enroll vm:
   cmd.run:
     - name: ipa-client-install --domain={{ grains['ipa_dns_zone']|upper }} {% for ipa_rep in pillar['client']['ipa_servers'] %} --server={{ ipa_rep }} {% endfor %} --realm={{ pillar['client']['ipa_realm']|upper }} --mkhomedir --principal="{{ pillar['client']['ipa_server_principal'] }}" --password='{{ pillar['client']['ipa_server_password'] }}' --force-join --unattended
