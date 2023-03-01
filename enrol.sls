@@ -4,11 +4,11 @@ apt get update:
 
 install chrony:
   cmd.run:
-    - name: apt-get install -y chrony
+    - name: apt-get install -y chrony freeipa-client python3-module-pip
 
-install freeipa-client:
+install python-freeipa:
   cmd.run:
-    - name: apt-get install -y freeipa-client
+    - name: pip3 install python-freeipa
 
 delete i attr from /etc/resolv.conf:
   file.managed:
@@ -113,6 +113,29 @@ Enroll vm:
   cmd.run:
     - name: ipa-client-install --domain={{ grains['ipa_dns_zone']|upper }} {% for ipa_rep in pillar['client']['ipa_servers'] %} --server={{ ipa_rep }} {% endfor %} --realm={{ pillar['client']['ipa_realm']|upper }} --mkhomedir --principal="{{ pillar['client']['ipa_server_principal'] }}" --password='{{ pillar['client']['ipa_server_password'] }}' --force-join --unattended
 
-add a-rec:
+#add a-rec:
+#  cmd.run:
+#    - name: ipa dnsrecord-add {{ grains['ipa_dns_zone'] }} {{ grains['service_name'] }} --a-rec={{ grains['ip4_interfaces']['eth0'][0] }}
+
+salt://scripts/enrol.py:
+  file.managed:
+    - name: /opt/enrol.py
+    - source: salt://scripts/enrol.py
+#    - makedirs: True
+
   cmd.run:
-    - name: ipa dnsrecord-add {{ grains['ipa_dns_zone'] }} {{ grains['service_name'] }} --a-rec={{ grains['ip4_interfaces']['eth0'][0] }}
+    #- name: {{ grains.pythonexecutable }} /srv/salt/scripts/enrol.py
+    - name: {{ grains.pythonexecutable }} /opt/enrol.py
+    #- tgt: 'MASTER'
+    - env:
+      - SERVICE_NAME: {{ grains['service_name'] }}
+      - HOSTNAME: {{ grains['host'] }}
+      - IPA_DNS_ZONE: {{ grains['ipa_dns_zone'] }}
+      - IP4_INTERFACES: {{ grains['ip4_interfaces']['eth0'][0] }}
+      - IPA_SERVERS: {{ pillar['client']['ipa_servers'] }}
+      - LOGIN: {{ pillar['client']['ipa_server_principal'] }}
+      - PASSWORD: {{ pillar['client']['ipa_server_password'] }}
+      - ENV: {{ grains['env'] }}
+      - VM_TYPE: {{ grains['vm_type'] }}
+      - PYTHONWARNINGS: "ignore:Unverified HTTPS request"
+

@@ -3,6 +3,5 @@ base:
     - unenrol
   '*.gtp':
     - enrol
-    {# - foo #}
 
 
