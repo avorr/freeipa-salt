@@ -18,5 +18,5 @@ client:
   ipa_location: gt-common-admins
   region: PD15_v2
   ipa_server_principal: 'test_admin_srv'
-  ipa_server_password: 'echou'
+  ipa_server_password: 'echou_w1tho.i}wae:Qu'
 
