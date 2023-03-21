@@ -3,5 +3,5 @@ base:
     - unenrol
   '*.gtp':
     - enrol
-
-
+  '*.kesl':
+    - kesl

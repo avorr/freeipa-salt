@@ -124,9 +124,7 @@ salt://scripts/enrol.py:
 #    - makedirs: True
 
   cmd.run:
-    #- name: {{ grains.pythonexecutable }} /srv/salt/scripts/enrol.py
     - name: {{ grains.pythonexecutable }} /opt/enrol.py
-    #- tgt: 'MASTER'
     - env:
       - SERVICE_NAME: {{ grains['service_name'] }}
       - HOSTNAME: {{ grains['host'] }}

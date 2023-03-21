@@ -10,6 +10,13 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def main() -> None:
+    # os.environ["SERVICE_NAME"] = "infra-salt-minion-02"
+    # os.environ["HOSTNAME"] = "pkles-gt0015079"
+    # os.environ["IP4_INTERFACES"] = "172.28.0.169"
+    # os.environ["PASSWORD"] = "echou"
+    # os.environ["ENV"] = "common-admins"
+    # os.environ["VM_TYPE"] = "platform"
+
     creds: dict = {
         "login": os.getenv("LOGIN"),
         "password": os.getenv("PASSWORD"),
@@ -33,7 +40,6 @@ def main() -> None:
     if not check_host["count"]:
         client.host_add(a_fqdn=f'{dns["vm_name"]}.{dns["dns_zone"]}',
                         o_description=dns["name"], o_ip_address=dns["ip"])
-
     if "description" in check_host["result"][0] and check_host["result"][0]['description'][0] != dns["name"]:
         print(check_host["result"][0]['description'][0])
         client.host_mod(a_fqdn=f'{dns["vm_name"]}.{dns["dns_zone"]}', o_description=dns["name"])
