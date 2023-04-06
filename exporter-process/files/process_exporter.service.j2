@@ -1,0 +1,14 @@
+[Unit]
+Description=process_exporter - Exporter for machine metrics.
+After=network.target
+
+[Service]
+User={{ process_exporter_user }}
+Group={{ process_exporter_group }}
+ExecStart={{ process_exporter_path }}/process-exporter {{ process_exporter_flags }}
+
+SyslogIdentifier=process_exporter
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
