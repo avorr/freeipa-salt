@@ -5,6 +5,7 @@
 {% set process_exporter_port = '19102' %}
 {% set process_exporter_flags = '--web.listen-address=:' ~ process_exporter_port ~ ' -config.path=' ~ process_exporter_path ~ '/config.yml -children=false' %}
 {% set process_names = { '"{{.Comm}}"': ['.+'] } %}
+{% set unique_id = '_process_exp_' %}
 
 {% if grains['os'] == 'ALT' %}
   {% set systemd_service_path = '/lib/systemd/system' %}
@@ -13,13 +14,13 @@
 {% endif %}
 
 {% if salt['service.status']('firewalld') %}
-add_exporter_ports:
+{{ unique_id }}add_exporter_ports:
   firewalld.present:
     - name: public
     - ports:
       - {{ process_exporter_port }}/tcp
 {% else %}
-firewalld_not_running:
+{{ unique_id }}firewalld_not_running:
   test.succeed_without_changes:
     - name: firewalld is not running
 {% endif %}
@@ -55,7 +56,7 @@ process_exporter_group:
     - defaults:
         process_names: {{ process_names }}
 
-extract_exporter:
+{{ unique_id }}extract_exporter:
   archive.extracted:
     - name: {{ process_exporter_path }}
     - source: salt://exporter-process/files/process_exporter-{{ process_exporter_version }}.linux-amd64.tar.gz
@@ -81,7 +82,7 @@ extract_exporter:
         process_exporter_path: {{ process_exporter_path }}
         process_exporter_flags: {{ process_exporter_flags }}
 
-daemon_reload_systemd:
+{{ unique_id }}daemon_reload_systemd:
   module.run:
     - name: service.systemctl_reload
 

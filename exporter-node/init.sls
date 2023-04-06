@@ -4,6 +4,7 @@
 {% set node_exporter_version = '1.3.1' %}
 {% set node_exporter_publish_port = '19100' %}
 {% set node_exporter_flags = '--collector.textfile.directory=' ~ node_exporter_path  ~ '/scripts/ --collector.systemd --web.telemetry-path "/metrics" --web.listen-address=0.0.0.0:' ~ node_exporter_publish_port %}
+{% set unique_id = '_node_exp_' %}
 
 {% if grains['os'] == 'ALT' %}
   {% set systemd_service_path = '/lib/systemd/system' %}
@@ -12,13 +13,13 @@
 {% endif %}
 
 {% if salt['service.status']('firewalld') %}
-add_exporter_ports:
+{{ unique_id }}add_exporter_ports:
   firewalld.present:
     - name: public
     - ports:
       - {{ node_exporter_publish_port }}/tcp
 {% else %}
-firewalld_not_running:
+{{ unique_id }}firewalld_not_running:
   test.succeed_without_changes:
     - name: firewalld is not running
 {% endif %}
@@ -43,7 +44,7 @@ node_exporter_group:
     - mode: '0755'
     - makedirs: True
 
-copy_scripts:
+{{ unique_id }}copy_scripts:
   file.recurse:
     - source: salt://exporter-node/scripts
     - name: {{ node_exporter_path }}/scripts
@@ -75,7 +76,7 @@ copy_scripts:
         node_exporter_path: {{ node_exporter_path }}
         node_exporter_user: {{ node_exporter_user }}
 
-extract_exporter:
+{{ unique_id }}extract_exporter:
   archive.extracted:
     - name: {{ node_exporter_path }}
     - source: salt://exporter-node/files/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
@@ -99,7 +100,7 @@ extract_exporter:
         node_exporter_path: {{ node_exporter_path }}
         node_exporter_flags: {{ node_exporter_flags }}
 
-daemon_reload_systemd:
+{{ unique_id }}daemon_reload_systemd:
   module.run:
     - name: service.systemctl_reload
 
