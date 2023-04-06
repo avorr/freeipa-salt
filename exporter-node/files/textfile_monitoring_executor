@@ -1,0 +1,1 @@
+*/59 * * * * {{ node_exporter_user }} {{ node_exporter_path }}/runner.sh

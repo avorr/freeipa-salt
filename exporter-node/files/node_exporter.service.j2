@@ -1,0 +1,14 @@
+# -*- mode: conf -*-
+
+[Unit]
+Description=Prometheus exporter for machine metrics, written in Go with pluggable metric collectors.
+Documentation=
+After=network.target
+
+[Service]
+User=prometheus
+ExecStart={{ node_exporter_path }}/node_exporter {{ node_exporter_flags }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

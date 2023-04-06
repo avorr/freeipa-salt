@@ -1,0 +1,8 @@
+process_names:
+{%- for key, value in process_names.items() %}
+  - name: {{ key }}
+    cmdline:
+{%- for item in value %}
+    - {{ item }}
+{% endfor -%}
+{% endfor -%}
