@@ -51,8 +51,8 @@ def main() -> None:
                              a_idnsname=dns["vm_name"],
                              o_a_part_ip_address=dns["ip"])
 
-    client.hostgroup_add_member(a_cn=f'{os.getenv("ENV")}-{os.getenv("VM_TYPE")}',
-                                o_host=f'{dns["vm_name"]}.{dns["dns_zone"]}')
+    # client.hostgroup_add_member(a_cn=f'{os.getenv("ENV")}-{os.getenv("VM_TYPE")}', o_host=f'{dns["vm_name"]}.{dns["dns_zone"]}')
+    client.hostgroup_add_member(a_cn=os.getenv("IPA_GROUP"), o_host=f'{dns["vm_name"]}.{dns["dns_zone"]}')
 
 
 if __name__ == '__main__':

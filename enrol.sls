@@ -133,7 +133,8 @@ salt://scripts/enrol.py:
       - IPA_SERVERS: {{ pillar['client']['ipa_servers'] }}
       - LOGIN: {{ pillar['client']['ipa_server_principal'] }}
       - PASSWORD: {{ pillar['client']['ipa_server_password'] }}
-      - ENV: {{ grains['env'] }}
-      - VM_TYPE: {{ grains['vm_type'] }}
+#      - ENV: {{ grains['env'] }}
+#      - VM_TYPE: {{ grains['vm_type'] }}
+      - IPA_GROUP: {{ grains['ipa_group'] }}
       - PYTHONWARNINGS: "ignore:Unverified HTTPS request"
 
