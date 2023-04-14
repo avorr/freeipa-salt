@@ -117,14 +117,14 @@ Enroll vm:
 #  cmd.run:
 #    - name: ipa dnsrecord-add {{ grains['ipa_dns_zone'] }} {{ grains['service_name'] }} --a-rec={{ grains['ip4_interfaces']['eth0'][0] }}
 
-salt://scripts/enrol.py:
+salt://scripts/enroll.py:
   file.managed:
-    - name: /opt/enrol.py
-    - source: salt://scripts/enrol.py
+    - name: /opt/enroll.py
+    - source: salt://scripts/enroll.py
 #    - makedirs: True
 
   cmd.run:
-    - name: {{ grains.pythonexecutable }} /opt/enrol.py
+    - name: {{ grains.pythonexecutable }} /opt/enroll.py
     - env:
       - SERVICE_NAME: {{ grains['service_name'] }}
       - HOSTNAME: {{ grains['host'] }}

@@ -13,10 +13,10 @@ client:
   ipa_realm: PD15.IPA.GTP
   rack: oKVM1
   ipa_location: gt-common-admins
-  env: common-admins
-  vm_type: plat
+#  env: common-admins
+#  vm_type: plat
   pd_stand: PD15_v2
   region: PD15_v2
   ipa_server_principal: 'test_admin_srv'
-  ipa_server_password: 'echou_w1tho.i}wae:Qu'
+  ipa_server_password: 'echou'
 

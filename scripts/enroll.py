@@ -47,9 +47,9 @@ def main() -> None:
     exist_dns_record: dict = client.dnsrecord_find(a_dnszoneidnsname=dns["dns_zone"], o_idnsname=dns["vm_name"])
 
     if not exist_dns_record["count"]:
-        client.dnsrecord_add(a_dnszoneidnsname=dns["dns_zone"],
-                             a_idnsname=dns["vm_name"],
-                             o_a_part_ip_address=dns["ip"])
+        client.dnsrecord_add(
+            a_dnszoneidnsname=dns["dns_zone"], a_idnsname=dns["vm_name"], o_a_part_ip_address=dns["ip"]
+        )
 
     # client.hostgroup_add_member(a_cn=f'{os.getenv("ENV")}-{os.getenv("VM_TYPE")}', o_host=f'{dns["vm_name"]}.{dns["dns_zone"]}')
     client.hostgroup_add_member(a_cn=os.getenv("IPA_GROUP"), o_host=f'{dns["vm_name"]}.{dns["dns_zone"]}')

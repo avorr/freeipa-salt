@@ -1,6 +1,6 @@
 base:
   '*':
-    - enrol
+    - enroll
     - kesl
 #  '*.kesl':
 #    - kesl

@@ -1,13 +1,13 @@
 base:
   'MASTER':
-    - unenrol
+    - unenroll
   '*.gtp':
-    - enrol
+    - enroll
     - kesl
     - sshkeys
     - authorized_keys
   '*.mtp':
-    - enrol
+    - enroll
     - kesl
     - exporter-node
     - exporter-process
