@@ -101,7 +101,7 @@ install root.ca:
     - mode: 0644
 {% endfor -%}
 
-Update CA Trust on RedHat:
+Update CA Trust on AltLinux:
   cmd.run:
     - name: update-ca-trust
 
@@ -111,17 +111,12 @@ kinit:
 
 Enroll vm:
   cmd.run:
-    - name: ipa-client-install --domain={{ grains['ipa_dns_zone']|upper }} {% for ipa_rep in pillar['client']['ipa_servers'] %} --server={{ ipa_rep }} {% endfor %} --realm={{ pillar['client']['ipa_realm']|upper }} --mkhomedir --principal="{{ pillar['client']['ipa_server_principal'] }}" --password='{{ pillar['client']['ipa_server_password'] }}' --force-join --unattended
-
-#add a-rec:
-#  cmd.run:
-#    - name: ipa dnsrecord-add {{ grains['ipa_dns_zone'] }} {{ grains['service_name'] }} --a-rec={{ grains['ip4_interfaces']['eth0'][0] }}
+    - name: ipa-client-install --domain={{ grains['ipa_dns_zone']|upper }} {% for ipa_rep in grains['ipa_servers'] %} --server={{ ipa_rep }} {% endfor %} --realm={{ pillar['client']['ipa_realm']|upper }} --mkhomedir --principal="{{ pillar['client']['ipa_server_principal'] }}" --password='{{ pillar['client']['ipa_server_password'] }}' --force-join --unattended
 
 salt://scripts/enroll.py:
   file.managed:
     - name: /opt/enroll.py
     - source: salt://scripts/enroll.py
-#    - makedirs: True
 
   cmd.run:
     - name: {{ grains.pythonexecutable }} /opt/enroll.py
@@ -130,11 +125,27 @@ salt://scripts/enroll.py:
       - HOSTNAME: {{ grains['host'] }}
       - IPA_DNS_ZONE: {{ grains['ipa_dns_zone'] }}
       - IP4_INTERFACES: {{ grains['ip4_interfaces']['eth0'][0] }}
-      - IPA_SERVERS: {{ pillar['client']['ipa_servers'] }}
+      - IPA_SERVERS: {{ grains['ipa_servers'] }}
       - LOGIN: {{ pillar['client']['ipa_server_principal'] }}
       - PASSWORD: {{ pillar['client']['ipa_server_password'] }}
-#      - ENV: {{ grains['env'] }}
-#      - VM_TYPE: {{ grains['vm_type'] }}
-      - IPA_GROUP: {{ grains['ipa_group'] }}
+      - ENV: {{ grains['env'] }}
+      - VM_TYPE: {{ grains['vm_type'] }}
+      - RACK: {{ grains['rack'] }}
+      - IPA_LOCATION: {{ grains['ipa_location'] }}
+      - OS_FULLNAME: {{ grains['osfullname'] }}
+      - OS_RELEASE: {{ grains['osrelease'] }}
       - PYTHONWARNINGS: "ignore:Unverified HTTPS request"
+
+stop sssd service:
+  service.dead:
+    - name: sssd
+
+clear sss cache:
+   file.directory:
+      - name: /var/lib/sss/db
+      - clean: True
+
+start sssd service:
+  service.running:
+    - name: sssd
 
