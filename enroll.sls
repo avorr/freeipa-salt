@@ -43,7 +43,7 @@ configure chronyd:
 
   service.dead:
     - name: chronyd
- 
+
 start chronyd:
   service.running:
     - name: chronyd
@@ -52,6 +52,11 @@ delete i attr from /etc/hosts:
   file.managed:
     - name: /etc/hosts
     - attrs: e
+
+change_hostname:
+  module.run:
+   - name: system.set_computer_name
+   - hostname: "{{ grains['id'] }}"
 
 configure /etc/hosts:
   file.managed:
@@ -70,7 +75,7 @@ configure /etc/hostsname:
     - user: root
     - group: root
     - mode: 0644
-    - contents: "{{ grains['id'] }}.{{ grains['ipa_dns_zone'] }}"
+    - contents: "{{ grains['id'] }}"
     - attrs: i
 
 {% if pillar['client']['region']|upper == 'PD15_V2' %}
@@ -148,4 +153,3 @@ clear sss cache:
 start sssd service:
   service.running:
     - name: sssd
-
