@@ -85,13 +85,23 @@ def main() -> None:
         client.host_add(
             a_fqdn=f'{host_info["vm_name"]}.{host_info["dns_zone"]}',
             o_description=host_info["name"],
-            o_ip_address=host_info["ip"]
+            o_ip_address=host_info["ip"],
+            o_userclass=host_info["vm_type"],
+            o_nshostlocation=host_info["env"],
+            o_l=host_info["rack"],
+            o_nshardwareplatform=host_info["ipa_location"],
+            o_nsosversion=f'{host_info["os_fullname"]}-{host_info["os_release"]}'
         )
         add_host_info()
-
-    check_host: dict = client.host_find(f'{host_info["vm_name"]}.{host_info["dns_zone"]}')
+        check_host: dict = client.host_find(f'{host_info["vm_name"]}.{host_info["dns_zone"]}')
 
     attrs: dict = check_host["result"][0]
+
+    if "description" not in attrs or "userclass" not in attrs or "nshostlocation" not in attrs or "l" not in attrs \
+            or "nshardwareplatform" not in attrs or "nsosversion" not in attrs:
+        add_host_info()
+        check_host: dict = client.host_find(f'{host_info["vm_name"]}.{host_info["dns_zone"]}')
+        attrs: dict = check_host["result"][0]
 
     if attrs["description"][0] != host_info["name"] or attrs["userclass"][0] != host_info["vm_type"] or \
             attrs["nshostlocation"][0] != host_info["env"] or attrs["l"][0] != host_info["rack"]:
@@ -102,22 +112,35 @@ def main() -> None:
         o_idnsname=host_info["vm_name"]
     )
 
+    if exist_a_record['count'] == 0:
+        client.dnsrecord_add(
+            a_dnszoneidnsname=host_info["dns_zone"],
+            a_idnsname=host_info["vm_name"],
+            o_a_part_ip_address=host_info["ip"],
+            o_a_extra_create_reverse=True
+        )
+        exist_a_record: dict = client.dnsrecord_find(
+            a_dnszoneidnsname=host_info["dns_zone"],
+            o_idnsname=host_info["vm_name"]
+        )
+
     if "arecord" not in exist_a_record['result'][0]:
         client.dnsrecord_add(
             a_dnszoneidnsname=host_info["dns_zone"],
             a_idnsname=host_info["vm_name"],
-            o_a_part_ip_address=host_info["ip"]
+            o_a_part_ip_address=host_info["ip"],
+            o_a_extra_create_reverse=True
         )
 
     add_srv_record(host_info["dns_zone"], "_blackbox_ssh._tcp", f'0 100 9022 {host_info["vm_name"]}')
     add_srv_record(host_info["dns_zone"], "_node._tcp", f'0 100 19100 {host_info["vm_name"]}')
     add_srv_record(host_info["dns_zone"], "_process._tcp", f'0 100 19102 {host_info["vm_name"]}')
 
-    add_ptr_record(
-        '.'.join(host_info["ip"].split('.')[0:3][::-1]) + '.in-addr.arpa.',
-        host_info["ip"].split('.')[3],
-        f'{host_info["vm_name"]}.{host_info["dns_zone"]}.'
-    )
+    #    add_ptr_record(
+    #        '.'.join(host_info["ip"].split('.')[0:3][::-1]) + '.in-addr.arpa.',
+    #        host_info["ip"].split('.')[3],
+    #        f'{host_info["vm_name"]}.{host_info["dns_zone"]}.'
+    #    )
 
     client.hostgroup_add_member(
         a_cn=f'{host_info["env"]}-{host_info["vm_type"]}',

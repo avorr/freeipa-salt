@@ -43,6 +43,8 @@ configure chronyd:
 
   service.dead:
     - name: chronyd
+    - onchanges:
+      - file: /etc/chrony.conf
 
 start chronyd:
   service.running:
@@ -69,6 +71,11 @@ configure /etc/hosts:
     - attrs: i
     - template: jinja
 
+delete i attr from /etc/hostname:
+  file.managed:
+    - name: /etc/hostname
+    - attrs: e
+
 configure /etc/hostsname:
   file.managed:
     - name: /etc/hostname
@@ -77,6 +84,86 @@ configure /etc/hostsname:
     - mode: 0644
     - contents: "{{ grains['id'] }}"
     - attrs: i
+
+{% if grains['os'] == 'ALT' %}
+  {% set sshd_config = '/etc/openssh/sshd_config' %}
+{% elif grains['os'] != 'ALT' %}
+  {% set sshd_config = '/etc/ssh/sshd_config' %}
+{% endif %}
+
+sshd_config add port 22:
+  file.line:
+    - name: "{{ sshd_config }}"
+    - mode: ensure
+    - after: Port 9022
+    - content: Port 22
+
+sshd_config add usedns no:
+  file.keyvalue:
+    - name: "{{ sshd_config }}"
+    - key: UseDNS
+    - value: 'no'
+    - separator: ' '
+    - uncomment: '# '
+    - key_ignore_case: True
+    - append_if_not_found: True
+
+configure sysctl:
+  file.managed:
+    - name: /etc/sysctl.d/00-tuneup.conf
+    - source:
+      - 'salt://00-tuneup.conf'
+    - user: root
+    - group: root
+    - mode: 0644
+
+  cmd.run:
+    - name: sysctl -p /etc/sysctl.d/00-tuneup.conf
+    - onchanges:
+      - file: /etc/sysctl.d/00-tuneup.conf
+
+configure limits:
+  file.managed:
+    - name: /etc/security/limits.d/99-tuneup.conf
+    - source:
+      - 'salt://99-tuneup.conf'
+    - user: root
+    - group: root
+    - mode: 0644
+
+{% if grains['os'] == 'ALT' %}
+fix timestamps:
+  file.keyvalue:
+    - name: /etc/net/sysctl.conf
+    - key: net.ipv4.tcp_timestamps
+    - value: 1
+    - separator: ' = '
+    - uncomment: '# '
+    - key_ignore_case: True
+    - append_if_not_found: True
+{% endif %}
+
+{% if grains['os'] == 'ALT' %}
+Manage "DST Root CA X3" certificate on Altlinux:
+  cmd.run:
+    - name: perl -e 'while(<>){last if $_ =~ m/DST Root CA X3/;}print $_;while(<>){last if length($_)==1;print $_}' < /etc/pki/tls/certs/ca-bundle.crt > /etc/pki/ca-trust/source/blacklist/DST_Root_CA_X3.pem && update-ca-trust extract
+    - onlyif: 'test ! -e /etc/pki/ca-trust/source/blacklist/DST_Root_CA_X3.pem'
+{% elif grains['os'] == 'AstraLinux' %}
+Delete line from configuration:
+  file.line:
+    - name: /etc/ca-certificates.conf
+    - mode: delete
+    - match: DST_Root_CA_X3
+
+Delete symlink:
+  file.absent:
+    - name: /etc/ssl/certs/DST_Root_CA_X3.pem
+
+Update CA Trust on AstraLinux:
+  cmd.run:
+    - name: update-ca-certificates -f
+    - onlyif: 'test -e /etc/ssl/certs/DST_Root_CA_X3.pem'
+{% endif %}
 
 {% if pillar['client']['region']|upper == 'PD15_V2' %}
   {% set certs = ['root_ca_ipa_pd15_v2.crt'] %}
@@ -113,10 +200,14 @@ Update CA Trust on AltLinux:
 kinit:
   cmd.run:
     - name: echo '{{ pillar['client']['ipa_server_password'] }}' | kinit {{ pillar['client']['ipa_server_principal'] }}
+    - output_loglevel: quiet
+    - quiet: True
 
 Enroll vm:
   cmd.run:
     - name: ipa-client-install --domain={{ grains['ipa_dns_zone']|upper }} {% for ipa_rep in grains['ipa_servers'] %} --server={{ ipa_rep }} {% endfor %} --realm={{ pillar['client']['ipa_realm']|upper }} --mkhomedir --principal="{{ pillar['client']['ipa_server_principal'] }}" --password='{{ pillar['client']['ipa_server_password'] }}' --force-join --unattended
+    - output_loglevel: quiet
+    - quiet: True
 
 salt://scripts/enroll.py:
   file.managed:
@@ -127,7 +218,7 @@ salt://scripts/enroll.py:
     - name: {{ grains.pythonexecutable }} /opt/enroll.py
     - env:
       - SERVICE_NAME: {{ grains['service_name'] }}
-      - HOSTNAME: {{ grains['host'] }}
+      - HOSTNAME: {{ grains['nodename'] | replace(".novalocal", "") }}
       - IPA_DNS_ZONE: {{ grains['ipa_dns_zone'] }}
       - IP4_INTERFACES: {{ grains['ip4_interfaces']['eth0'][0] }}
       - IPA_SERVERS: {{ grains['ipa_servers'] }}

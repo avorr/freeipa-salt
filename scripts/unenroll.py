@@ -22,7 +22,7 @@ def main() -> None:
 
     check_host: dict = client.host_find(minion_id)
 
-    def remove_srv_record(dns_zone: str, idnsname: str, srv_record: str):
+    def remove_srv_record(dns_zone: str, idnsname: str, srv_record: str) -> None:
 
         check_srv_record: dict = client.dnsrecord_find(dns_zone, o_idnsname=idnsname)
 
