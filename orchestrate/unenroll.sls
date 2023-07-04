@@ -24,5 +24,3 @@ remove minion key:
    - refresh: True
    - args:
      - {{ minion_id }}
-
-

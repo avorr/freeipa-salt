@@ -136,12 +136,6 @@ def main() -> None:
     add_srv_record(host_info["dns_zone"], "_node._tcp", f'0 100 19100 {host_info["vm_name"]}')
     add_srv_record(host_info["dns_zone"], "_process._tcp", f'0 100 19102 {host_info["vm_name"]}')
 
-    #    add_ptr_record(
-    #        '.'.join(host_info["ip"].split('.')[0:3][::-1]) + '.in-addr.arpa.',
-    #        host_info["ip"].split('.')[3],
-    #        f'{host_info["vm_name"]}.{host_info["dns_zone"]}.'
-    #    )
-
     client.hostgroup_add_member(
         a_cn=f'{host_info["env"]}-{host_info["vm_type"]}',
         o_host=f'{host_info["vm_name"]}.{host_info["dns_zone"]}'
