@@ -1,10 +1,16 @@
+{% if grains['os'] == 'ALT' %}
+  {% set apt_install_cmd = 'apt-get install -y chrony freeipa-client python3-module-pip' %}
+{% elif grains['os'] == 'AstraLinux' %}
+  {% set apt_install_cmd = 'apt install -y chrony freeipa-client python3-pip' %}
+{% endif %}
+
 apt get update:
   cmd.run:
     - name: apt-get update
 
-install chrony:
+install packages:
   cmd.run:
-    - name: apt-get install -y chrony freeipa-client python3-module-pip
+    - name: "{{ apt_install_cmd }}"
 
 install python-freeipa:
   cmd.run:
